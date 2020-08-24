@@ -1,4 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'quiz_brain.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(Quizzler());
 
@@ -25,16 +30,37 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
-  List<Icon> scoreKeeper = [
-    Icon(
-      Icons.check,
-      color: Colors.green,
-    ),
-    Icon(
-      Icons.close,
-      color: Colors.red,
-    )
-  ];
+  List<Icon> scoreKeeper = [];
+
+  void checkAnswer(bool userPickedAnswer, context) {
+    bool correctAnswer = quizBrain.getCorrectAnswer();
+
+    setState(() {
+      if (userPickedAnswer == correctAnswer) {
+        scoreKeeper.add(Icon(
+          Icons.check,
+          color: Colors.green,
+        ));
+      } else {
+        scoreKeeper.add(Icon(
+          Icons.close,
+          color: Colors.red,
+        ));
+      }
+      ;
+
+      quizBrain.nextQuestion();
+      if (quizBrain.getQuestionNumber() == 0) {
+        scoreKeeper = [];
+        Alert(
+                context: context,
+                title: "Finished",
+                desc: "You've reached the end of the quiz!")
+            .show();
+      }
+      ;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +74,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                quizBrain.getQuestionText(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -72,14 +98,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                setState(() {
-                  scoreKeeper.add(
-                    Icon(
-                      Icons.check,
-                      color: Colors.green,
-                    ),
-                  );
-                });
+                checkAnswer(true, context);
               },
             ),
           ),
@@ -97,7 +116,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                //The user picked false.
+                checkAnswer(false, context);
               },
             ),
           ),
